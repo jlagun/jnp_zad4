@@ -1,7 +1,6 @@
 #pragma once
 
 #include <type_traits>
-#include <cstdint>
 #include <cassert>
 
 template<bool canAttack, typename U, int minSpeed, int maxSpeed>
@@ -11,15 +10,15 @@ public:
 	typedef U value_type;
 	
 	// konstruktor dla statkow, ktore moga atakowac
-	template<typename Dummy = void, typename = typename std::enable_if<canAttack == true, Dummy>::type>
-	constexpr RebelStarship(U _shield, U _speed, U _attackPower)
+	template<typename Dummy = void, typename = std::enable_if_t<canAttack == true, Dummy>>
+	RebelStarship(U _shield, U _speed, U _attackPower)
 		: shield(_shield), speed(_speed), attackPower(_attackPower) {
 		assert(minSpeed <= speed && speed <= maxSpeed);
 	}
 	
 	// konstruktor dla statkow, ktore nie moga atakowac
-	template<typename Dummy = void, typename = typename std::enable_if<canAttack == false, Dummy>::type>
-	constexpr RebelStarship(U _shield, U _speed)
+	template<typename Dummy = void, typename = std::enable_if_t<canAttack == false, Dummy>>
+	RebelStarship(U _shield, U _speed)
 		: shield(_shield), speed(_speed) {
 		assert(minSpeed <= speed && speed <= maxSpeed);
 	}
@@ -32,7 +31,7 @@ public:
 		return speed;
 	}
 	
-	template<typename Dummy = void, typename = typename std::enable_if<canAttack == true, Dummy>::type>
+	template<typename Dummy = void, typename = std::enable_if_t<canAttack == true, Dummy>>
 	U getAttackPower() const {
 		return attackPower;
 	}
