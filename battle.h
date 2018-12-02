@@ -8,13 +8,9 @@
 
 template<typename T, T t0, T t1, typename... S>
 class SpaceBattle {
-	template<typename... Args>
-	static constexpr bool all_ships() {
-		return ((is_rebelship<Args>::value || is_imperialship<Args>::value) && ...);
-	}
-	
 	static_assert(t0 <= t1 && t0 >= 0, "invalid start or end time");
-	static_assert(sizeof...(S) == 0 || all_ships<S...>(), "S should contain only spaceship types");
+	static_assert(((is_rebelship<S>::value || is_imperialship<S>::value) && ...),
+	              "S should contain only spaceship types");
 
 	template<T i = 0, T... vals>
 	static constexpr auto calcSquares() {
@@ -29,24 +25,6 @@ class SpaceBattle {
 	mutable size_t rebelAlive, imperialAlive;
 	T curTime;
 	std::tuple<S&...> ships;
-	
-	template<typename SH>
-	void countHelper(const SH& ship, size_t &rebelCnt, size_t &imperialCnt) const {
-		if constexpr (is_rebelship<SH>::value)
-			rebelCnt += ship.getShield() > 0;
-		else if constexpr (is_imperialship<SH>::value)
-			imperialCnt += ship.getShield() > 0;
-	}
-	
-	// liczy liczbe statkow rebelii i imperium
-	template<size_t id = 0>
-	std::pair<size_t, size_t> count(size_t rebelCnt = 0, size_t imperialCnt = 0) const {
-		if constexpr (id < shipsNum)
-			countHelper(std::get<id>(ships), rebelCnt, imperialCnt);
-		if constexpr (id + 1 < shipsNum)
-			return count<id + 1>(rebelCnt, imperialCnt);
-		return {rebelCnt, imperialCnt};
-	}
 	
 	template<typename S1, typename S2>
 	void battleHelper(S1 &a, S2 &b) {
@@ -64,6 +42,24 @@ class SpaceBattle {
 			battle<id1 + 1, id2>();
 		else if constexpr (id2 + 1 < shipsNum)
 			battle<0, id2 + 1>();
+	}
+	
+	template<typename SH>
+	void countHelper(const SH& ship, size_t &rebelCnt, size_t &imperialCnt) const {
+		if constexpr (is_rebelship<SH>::value)
+			rebelCnt += ship.getShield() > 0;
+		else if constexpr (is_imperialship<SH>::value)
+			imperialCnt += ship.getShield() > 0;
+	}
+	
+	// liczy liczbe statkow rebelii i imperium
+	template<size_t id = 0>
+	std::pair<size_t, size_t> count(size_t rebelCnt = 0, size_t imperialCnt = 0) const {
+		if constexpr (id < shipsNum)
+			countHelper(std::get<id>(ships), rebelCnt, imperialCnt);
+		if constexpr (id + 1 < shipsNum)
+			return count<id + 1>(rebelCnt, imperialCnt);
+		return {rebelCnt, imperialCnt};
 	}
 	
 	void updateCounts() const {
@@ -100,6 +96,6 @@ public:
 		if (std::binary_search(std::begin(attackMoments), std::end(attackMoments), curTime))
 			battle();
 		
-		curTime = (curTime + timeStep) % t1;
+		curTime = (curTime + timeStep) % (t1 + 1);
 	}
 };
