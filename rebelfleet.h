@@ -5,6 +5,8 @@
 
 template<bool canAttack, typename U, int minSpeed, int maxSpeed>
 class RebelStarship {
+	static_assert(std::is_arithmetic<U>(), "U should be arithmetic");
+	
 	U shield, speed, attackPower;
 public:
 	typedef U value_type;

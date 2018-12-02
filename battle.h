@@ -8,21 +8,13 @@
 
 template<typename T, T t0, T t1, typename... S>
 class SpaceBattle {
-	template<typename SH, typename... Args>
+	template<typename... Args>
 	static constexpr bool all_ships() {
-		if constexpr (is_rebelship<SH>() || is_imperialship<SH>()) {
-			if constexpr (sizeof...(Args) == 0)
-				return true;
-			else
-				return all_ships<Args...>();
-		}
-		else
-			return false;
+		return ((is_rebelship<Args>::value || is_imperialship<Args>::value) && ...);
 	}
 	
 	static_assert(t0 <= t1 && t0 >= 0, "invalid start or end time");
-	static_assert(sizeof...(S) > 0, "invalid number of ships");
-	static_assert(all_ships<S...>(), "S should contain only spaceship types");
+	static_assert(sizeof...(S) == 0 || all_ships<S...>(), "S should contain only spaceship types");
 
 	template<T i = 0, T... vals>
 	static constexpr auto calcSquares() {
@@ -40,16 +32,17 @@ class SpaceBattle {
 	
 	template<typename SH>
 	void countHelper(const SH& ship, size_t &rebelCnt, size_t &imperialCnt) const {
-		if constexpr (is_rebelship<SH>())
+		if constexpr (is_rebelship<SH>::value)
 			rebelCnt += ship.getShield() > 0;
-		else if constexpr (is_imperialship<SH>())
+		else if constexpr (is_imperialship<SH>::value)
 			imperialCnt += ship.getShield() > 0;
 	}
 	
 	// liczy liczbe statkow rebelii i imperium
 	template<size_t id = 0>
 	std::pair<size_t, size_t> count(size_t rebelCnt = 0, size_t imperialCnt = 0) const {
-		countHelper(std::get<id>(ships), rebelCnt, imperialCnt);
+		if constexpr (id < shipsNum)
+			countHelper(std::get<id>(ships), rebelCnt, imperialCnt);
 		if constexpr (id + 1 < shipsNum)
 			return count<id + 1>(rebelCnt, imperialCnt);
 		return {rebelCnt, imperialCnt};
@@ -57,15 +50,16 @@ class SpaceBattle {
 	
 	template<typename S1, typename S2>
 	void battleHelper(S1 &a, S2 &b) {
-		if constexpr (is_imperialship<S1>() && is_rebelship<S2>())
+		if constexpr (is_imperialship<S1>::value && is_rebelship<S2>::value)
 			if (a.getShield() > 0 && b.getShield() > 0)
-				attack<S1, S2>(a, b);
+				attack(a, b);
 	}
 	
 	// iteruje sie po kazdej parze statkow i przeprowadza bitwe miedzy nimi
 	template<size_t id1 = 0, size_t id2 = 0>
 	void battle() {
-		battleHelper(std::get<id1>(ships), std::get<id2>(ships));
+		if constexpr (id1 < shipsNum)
+			battleHelper(std::get<id1>(ships), std::get<id2>(ships));
 		if constexpr (id1 + 1 < shipsNum)
 			battle<id1 + 1, id2>();
 		else if constexpr (id2 + 1 < shipsNum)
@@ -95,11 +89,11 @@ public:
 	void tick(T timeStep) {
 		updateCounts();
 		if (imperialAlive == 0) {
-			puts(rebelAlive == 0 ? "DRAW\n" : "REBELLION WON\n");
+			puts(rebelAlive == 0 ? "DRAW" : "REBELLION WON");
 			return;
 		}
 		else if (rebelAlive == 0) {
-			puts("IMPERIUM WON\n");
+			puts("IMPERIUM WON");
 			return;
 		}
 		
