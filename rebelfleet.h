@@ -9,7 +9,7 @@ class RebelStarship {
 	
 	U shield, speed, attackPower;
 public:
-	typedef U value_type;
+	typedef U valueType;
 	
 	// konstruktor dla statkow, ktore moga atakowac
 	template<typename Dummy = void, typename = std::enable_if_t<canAttack == true, Dummy>>

@@ -3,8 +3,34 @@
 #include <type_traits>
 #include "rebelfleet.h"
 
-template<typename U>
-class ImperialStarship {};
+template<typename U, int minSpeed, int maxSpeed>
+class ImperialStarship {
+	static_assert(std::is_arithmetic<U>(), "U should be arithmetic");
+
+	U shield, speed, attackPower;
+
+public:
+	typedef U valueType;
+
+	//konstruktor dla wszystkich statków
+	ImperialStarship(U _shield, U _attackPower)
+		: shield(_shield), attackPower(_attackPower) {};
+
+	U getShield() {
+		return shield;
+	}
+
+	U getAttackPower() {
+		return attackPower;
+	}
+
+	void takeDamage(U damage) {
+		if(damage <= shield)
+			shield -= damage;
+		else
+			shield = 0;
+	}
+};
 
 template<typename>
 struct is_imperialship : std::false_type {};
