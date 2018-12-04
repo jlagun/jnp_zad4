@@ -8,6 +8,7 @@
 
 template<typename T, T t0, T t1, typename... S>
 class SpaceBattle {
+	static_assert(std::is_arithmetic<T>::value, "T should be arithmetic");
 	static_assert(t0 <= t1 && t0 >= 0, "invalid start or end time");
 	static_assert(((is_rebelship<S>::value || is_imperialship<S>::value) && ...),
 	              "S should contain only spaceship types");

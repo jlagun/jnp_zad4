@@ -5,32 +5,37 @@
 
 template<typename U>
 class ImperialStarship {
-	static_assert(std::is_arithmetic<U>(), "U should be arithmetic");
-
-	U shield, speed, attackPower;
+	static_assert(std::is_arithmetic<U>::value, "U should be arithmetic");
+	
+	U shield;
+	const U attackPower;
 
 public:
 	typedef U valueType;
-
-	//konstruktor dla wszystkich statków
+	
 	ImperialStarship(U _shield, U _attackPower)
-		: shield(_shield), attackPower(_attackPower) {};
-
-	U getShield() {
+		: shield(_shield), attackPower(_attackPower) {}
+	
+	U getShield() const {
 		return shield;
 	}
-
-	U getAttackPower() {
+	
+	U getAttackPower() const {
 		return attackPower;
 	}
-
+	
 	void takeDamage(U damage) {
-		if(damage <= shield)
+		if (damage < shield)
 			shield -= damage;
 		else
 			shield = 0;
 	}
 };
+
+template<typename U> using DeathStar = ImperialStarship<U>;
+template<typename U> using ImperialDestroyer = ImperialStarship<U>;
+template<typename U> using TIEFighter = ImperialStarship<U>;
+
 
 template<typename>
 struct is_imperialship : std::false_type {};
@@ -41,7 +46,9 @@ struct is_imperialship<ImperialStarship<U>> : std::true_type {};
 template<typename I, typename R>
 void attack(I &imperialShip, R &rebelShip) {
 	static_assert(is_imperialship<I>::value && is_rebelship<R>::value);
-	rebelShip.takeDamage(imperialShip.getAttackPower());
-	if constexpr (is_rebelship_with_attack<R>::value)
-		imperialShip.takeDamage(rebelShip.getAttackPower());
+	if (imperialShip.getShield() > 0 && rebelShip.getShield() > 0) {
+		rebelShip.takeDamage(imperialShip.getAttackPower());
+		if constexpr (is_rebelship_with_attack<R>::value)
+			imperialShip.takeDamage(rebelShip.getAttackPower());
+	}
 }

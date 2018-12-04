@@ -5,9 +5,12 @@
 
 template<bool canAttack, typename U, int minSpeed, int maxSpeed>
 class RebelStarship {
-	static_assert(std::is_arithmetic<U>(), "U should be arithmetic");
+	static_assert(std::is_arithmetic<U>::value, "U should be arithmetic");
 	
-	U shield, speed, attackPower;
+	U shield;
+	const U speed;
+	const U attackPower;
+	
 public:
 	typedef U valueType;
 	
@@ -21,7 +24,7 @@ public:
 	// konstruktor dla statkow, ktore nie moga atakowac
 	template<typename Dummy = void, typename = std::enable_if_t<canAttack == false, Dummy>>
 	RebelStarship(U _shield, U _speed)
-		: shield(_shield), speed(_speed) {
+		: shield(_shield), speed(_speed), attackPower(0) {
 		assert(minSpeed <= speed && speed <= maxSpeed);
 	}
 	
