@@ -15,7 +15,7 @@ class SpaceBattle {
 
 	template<T i = 0, T... vals>
 	static constexpr auto calcSquares() {
-		if constexpr (i * i > t1)
+		if constexpr (i != 0 && i > t1 / i)
 			return std::array<T, sizeof...(vals)> {{vals...}};
 		else
 			return calcSquares<i + 1, vals..., i * i>();
