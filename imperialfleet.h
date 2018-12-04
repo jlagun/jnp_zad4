@@ -3,7 +3,7 @@
 #include <type_traits>
 #include "rebelfleet.h"
 
-template<typename U, int minSpeed, int maxSpeed>
+template<typename U>
 class ImperialStarship {
 	static_assert(std::is_arithmetic<U>(), "U should be arithmetic");
 
@@ -41,5 +41,7 @@ struct is_imperialship<ImperialStarship<U>> : std::true_type {};
 template<typename I, typename R>
 void attack(I &imperialShip, R &rebelShip) {
 	static_assert(is_imperialship<I>::value && is_rebelship<R>::value);
-	if constexpr (is_rebelship_with_attack<R>::value);
+	rebelShip.takeDamage(imperialShip.getAttackPower());
+	if constexpr (is_rebelship_with_attack<R>::value)
+		imperialShip.takeDamage(rebelShip.getAttackPower());
 }
